@@ -1,6 +1,9 @@
-import Distribution.SPDX (LicenseId(AFL_3_0))
+import Distribution.SPDX (LicenseId(AFL_3_0, AFL_2_0))
 import Data.String (IsString)
 -- This file is referred to as "prime.hs" in the text.
+-- You can run it with 
+-- $ ghci
+-- *Main> :load ch1
 
 -- Exercise 1.3
 divides d n = rem n d == 0
@@ -162,6 +165,114 @@ substring :: String -> String -> Bool
 substring str1 [] = False
 substring str1 (x:xs) = prefix str1 (x:xs) || prefix str1 xs
 
+test_substring = do
+    print(substring "lock" "flock")
+    print(not (substring "locker" "docker"))
+
+-- Exercise 1.18
+-- Finding expressions with types
+-- [String]          ["f"]
+-- (Bool, String)    (True, "False")
+-- [(Bool, String)]  [(True, "False")]
+-- ([Bool], String)  ([True], "False")
+-- Bool -> Bool      not
+
+-- Exercise 1.19
+-- Use :t to find the types of the following pre-defined functions
+-- head is [a] -> a
+-- last is [a] -> a
+-- init is [a] -> [a]
+-- fst is (a, b) -> a
+-- (++) is [a] -> [a] -> [a]
+-- flip is (a -> b -> c) -> b -> a -> c
+-- flip (++) is [a] -> [a] -> [a]
+
+-- Note that the int is the first arg and whether to make minus is the second
+fliptest x makeminus | makeminus = -x
+                     | otherwise = x
+
+flipped = flip fliptest
+
+test_fliptest = do
+    -- Note that now the order of the args is reversed
+    print(flipped True 9 == -9)
+
+-- The prime factorisation theorem!
+factors :: Integer -> [Integer]
+factors n | n < 1 = error "argument not positive"
+          | n == 1 = []
+          | otherwise = p : factors (div n p) where p = ld n
+
+test_primefactors = do
+    print(factors 84)
+    print(factors 890)
+
+-- 1.8 Map and Filter
+-- I think map's type scheme is...
+-- map' (a -> b) -> [a] -> [b]
+
+-- I think filter could be implemented like this
+filter' p [] = []
+filter' p (x:xs) | p x = x : filter' p xs
+                 | otherwise  = filter' p xs
+
+test_filter' = do
+    print(filter' (<3) [9, 2] == [2])
+
+-- sections
+test_sections = do
+    print(map (1 +) [1 .. 9])
+
+
+-- Exercise 1.20
+-- Write a lengths func with map
+lengths = map len'
+
+test_lengths = do
+    print(lengths [[], [1], [88,99]] == [0, 1, 2])
+
+-- Exercise 1.21
+sumLengths :: [[a]] -> Int
+sumLengths l = sum (lengths l)
+
+test_sumLengths = do
+    print(sumLengths [[], [1], [88,99]] == 3)
+
+
+-- An infinite list of primes using filter
+primes0 :: [Integer]
+primes0 = filter prime0 [2..]
+
+-- Exercise 1.24
+-- What happens when you modify the defining equation of ldp as follows
+ldp :: Integer -> Integer
+ldp = ldpf primes1
+
+ldpf :: [Integer] -> Integer -> Integer
+ldpf (p:ps) n | rem n p == 0 = p
+              | p^2 > n = n
+              | otherwise = ldpf ps n
+
+primes1 :: [Integer]
+primes1 = 2 : filter prime [3..]
+
+prime :: Integer -> Bool
+prime n | n < 1 = error "not a positive integer"
+        | n == 1 = False
+        | otherwise = ldp n == n
+
+test_new_ldf = do
+    print(ldp 21 == 3)
+
+-- 1.9 Equational reasoning
+-- Note "(n+k)" patterns removed in Haskell 2010
+--g 0 = 1
+--g (k+1) = 4
+a = 3
+b = 4
+f :: Integer -> Integer -> Integer 
+f x y = x^2 + y^2
+
 
 -- A convenience func for calling other functions
 main = do
@@ -172,3 +283,11 @@ main = do
     test_countChar
     test_blowup
     test_srtString
+    test_substring
+    test_fliptest
+    test_primefactors
+    test_sections
+    test_lengths
+    test_sumLengths
+    test_new_ldf
+    test_filter'
